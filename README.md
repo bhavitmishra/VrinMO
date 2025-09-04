@@ -1,58 +1,57 @@
-# Turborepo Tailwind CSS starter
+# VrinMO (Half-Baked Version)
 
-This Turborepo starter is maintained by the Turborepo core team.
+**Status:** 🚧 Work in Progress  
+**Stack:** Next.js (User & Merchant apps), Express (Webhook server), Postgres, TurboRepo  
 
-## Using this example
+---
 
-Run the following command:
+## Overview
 
-```sh
-npx create-turbo@latest -e with-tailwind
-```
+VrinMO is a multi-app project including:
 
-## What's inside?
+- **User App** – Next.js frontend for end users.
+- **Merchant App** – Next.js frontend for merchants.
+- **Onramping Service** – Currently half-baked TurboRepo setup, faked out HDFC bank API (no auth yet).
+- **Webhook Server** – Express server handling incoming webhooks.
+- **Database** – PostgreSQL storing users, merchants, transactions.
 
-This Turborepo includes the following packages/apps:
+⚠️ Most features are **half-baked**. Onramping, bank integration, and auth are placeholders.
 
-### Apps and Packages
+---
 
-- `docs`: a [Next.js](https://nextjs.org/) app with [Tailwind CSS](https://tailwindcss.com/)
-- `web`: another [Next.js](https://nextjs.org/) app with [Tailwind CSS](https://tailwindcss.com/)
-- `ui`: a stub React component library with [Tailwind CSS](https://tailwindcss.com/) shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
+## Features (Currently Working)
 
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
+- Basic onramping flow (faked HDFC API)  
+- User & merchant app skeletons (semi-functional) 
+- Postgres DB setup & basic models
+- NextAuth for authentication
+- Webhook server listening to events  
+- TurboRepo monorepo structure  
 
-### Building packages/ui
+---
 
-This example is set up to produce compiled styles for `ui` components into the `dist` directory. The component `.tsx` files are consumed by the Next.js apps directly using `transpilePackages` in `next.config.ts`. This was chosen for several reasons:
+## Features In Progress / Missing
 
-- Make sharing one `tailwind.config.ts` to apps and packages as easy as possible.
-- Make package compilation simple by only depending on the Next.js Compiler and `tailwindcss`.
-- Ensure Tailwind classes do not overwrite each other. The `ui` package uses a `ui-` prefix for it's classes.
-- Maintain clear package export boundaries.
+- Bank API authentication & proper integration  
+- Full onramping management & validations
+- Full oframping and payment within users 
+- Production-ready deployment setup  
+- Comprehensive testing
 
-Another option is to consume `packages/ui` directly from source without building. If using this option, you will need to update the `tailwind.config.ts` in your apps to be aware of your package locations, so it can find all usages of the `tailwindcss` class names for CSS compilation.
+---
 
-For example, in [tailwind.config.ts](packages/tailwind-config/tailwind.config.ts):
+## Getting Started
 
-```js
-  content: [
-    // app content
-    `src/**/*.{js,ts,jsx,tsx}`,
-    // include packages if not transpiling
-    "../../packages/ui/*.{js,ts,jsx,tsx}",
-  ],
-```
+### Prerequisites
 
-If you choose this strategy, you can remove the `tailwindcss` and `autoprefixer` dependencies from the `ui` package.
+- Node.js >= 18  
+- PostgreSQL running locally or via Docker  
+- npm  
 
-### Utilities
+### Setup
 
-This Turborepo has some additional tools already setup for you:
+1. Clone the repo:
 
-- [Tailwind CSS](https://tailwindcss.com/) for styles
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
+```bash
+git clone https://github.com/bhavitmishra/VrinMO.git
+cd VrinMO
