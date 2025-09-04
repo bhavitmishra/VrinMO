@@ -1,7 +1,7 @@
 # VrinMO (Half-Baked Version)
 
 **Status:** 🚧 Work in Progress  
-**Stack:** Next.js (User & Merchant apps), Express (Webhook server), Postgres, TurboRepo  
+**Stack:** Next.js (User, Merchant apps & Faked HDFC banking app), Express (Webhook server), Postgres, TurboRepo  
 
 ---
 
