@@ -1,5 +1,5 @@
 "use client";
-import { Home, Compass, Gift, Send, List, Menu } from "lucide-react";
+import { Home, Compass, Users, Send, List, Menu } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 
@@ -14,7 +14,7 @@ export default function Sidebar({
   const SideBarOptions = [
     { name: "Home", icon: <Home className="ui:h-5 ui:w-5" /> },
     { name: "Explore", icon: <Compass className="ui:h-5 ui:w-5" /> },
-    { name: "Rewards", icon: <Gift className="ui:h-5 ui:w-5" /> },
+    { name: "P2P", icon: <Users className="ui:h-5 ui:w-5" /> },
     { name: "Transfer", icon: <Send className="ui:h-5 ui:w-5" /> },
     { name: "Transactions", icon: <List className="ui:h-5 ui:w-5" /> },
   ];

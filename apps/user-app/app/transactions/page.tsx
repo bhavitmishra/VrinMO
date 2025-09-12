@@ -1,22 +1,54 @@
-"use client";
-import AppBar from "@repo/ui/Appbar";
 import Sidebar from "@repo/ui/Sidebar";
-import {
-  ArrowDownToLine,
-  ArrowUpFromLine,
-  CreditCard,
-  Landmark,
-} from "lucide-react";
-import { useState } from "react";
+import { getServerSession } from "next-auth";
+import { Auth } from "../api/lib/auth";
+import { prisma } from "@repo/db";
+import { redirect } from "next/navigation";
 
-export default function TransferPage() {
-  const methods = [
-    { name: "UPI Options", icon: Landmark },
-    { name: "Credit/Debit/ATM Card", icon: CreditCard },
-  ];
-  const [active, setActive] = useState("Credit/Debit/ATM Card");
-  const [activeTab, setActiveTab] = useState("deposit");
-  const [amt, setAmt] = useState(0);
+export default async function TransactionPage() {
+  const session = await getServerSession(Auth);
+  if (!session?.user?.id) {
+    redirect("/signin");
+  }
+
+  const userId = Number(session.user.id);
+  if (isNaN(userId)) {
+    return <p className="text-red-500">Invalid user</p>;
+  }
+
+  // Run queries in parallel
+  const [onramps, p2pFrom, p2pTo] = await Promise.all([
+    prisma.onRampTransaction.findMany({
+      where: { userId },
+      orderBy: { startTime: "desc" },
+    }),
+    prisma.p2pTransfer.findMany({
+      where: { fromUserId: userId },
+      orderBy: { timestamp: "desc" },
+    }),
+    prisma.p2pTransfer.findMany({
+      where: { toUserId: userId },
+      orderBy: { timestamp: "desc" },
+    }),
+  ]);
+
+  // Normalize date field for sorting
+  const allTransactions = [
+    ...onramps.map((t) => ({
+      type: "onramp" as const,
+      date: t.startTime,
+      ...t,
+    })),
+    ...p2pFrom.map((t) => ({
+      type: "p2p-sent" as const,
+      date: t.timestamp,
+      ...t,
+    })),
+    ...p2pTo.map((t) => ({
+      type: "p2p-received" as const,
+      date: t.timestamp,
+      ...t,
+    })),
+  ].sort((a, b) => b.date.getTime() - a.date.getTime());
 
   return (
     <div className="flex min-h-screen bg-gray-50">
@@ -27,49 +59,63 @@ export default function TransferPage() {
 
       {/* Main Content */}
       <div className="flex flex-1 flex-col mt-6 mx-8">
-        {/* Page Header */}
         <h1 className="text-blue-600 font-extrabold text-4xl px-2">
-          Transaction
+          Transactions
         </h1>
 
-        {/* Deposit / Withdraw Toggle */}
-        <div className="flex items-center gap-4 mt-6">
-          <button
-            onClick={() => setActiveTab("deposit")}
-            className={`flex items-center gap-2 px-6 py-2 rounded-full font-medium transition shadow-sm 
-            ${
-              activeTab === "deposit"
-                ? "bg-blue-500 text-white"
-                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-            }`}
-          >
-            <ArrowDownToLine className="w-5 h-5" /> Recent Payments
-          </button>
-          <button
-            onClick={() => setActiveTab("withdraw")}
-            className={`flex items-center gap-2 px-6 py-2 rounded-full font-medium transition shadow-sm 
-            ${
-              activeTab === "withdraw"
-                ? "bg-blue-500 text-white"
-                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-            }`}
-          >
-            <ArrowUpFromLine className="w-5 h-5" /> Scheduled Payments
-          </button>
-        </div>
+        <div className="mt-6 space-y-4">
+          {allTransactions.length === 0 ? (
+            <p className="text-gray-500">No transactions yet.</p>
+          ) : (
+            allTransactions.map((t) => (
+              <div
+                key={t.id}
+                className="p-4 border rounded-lg shadow-sm bg-white"
+              >
+                <p>
+                  <span className="font-semibold">Type:</span> {t.type}
+                </p>
+                <p>
+                  <span className="font-semibold">Amount:</span> {t.amount}
+                </p>
+                <p>
+                  <span className="font-semibold">Date:</span>{" "}
+                  {t.date.toLocaleString()}
+                </p>
 
-        {/* Payment Section */}
-        <div className="flex flex-1 mt-8 bg-white shadow-xl rounded-2xl overflow-hidden">
-          {/* Payment Methods Sidebar */}
+                {t.type === "onramp" && (
+                  <>
+                    <p>
+                      <span className="font-semibold">Provider:</span>{" "}
+                      {t.provider}
+                    </p>
+                    <p>
+                      <span className="font-semibold">Status:</span> {t.status}
+                    </p>
+                  </>
+                )}
 
-          {/* Payment Form */}
-          <div className="flex-1 p-8 bg-white">
-            <ul>
-              <li>Starbucks --------{">"} $1500 </li>
-              <li>Krozzon --------{">"} $1500</li>
-              <li>Bake n Shake --------{">"} $1500</li>
-            </ul>
-          </div>
+                {t.type.startsWith("p2p") && (
+                  <>
+                    <p>
+                      <span className="font-semibold">From:</span>{" "}
+                      {
+                        //@ts-ignore
+                        t.fromUserId
+                      }
+                    </p>
+                    <p>
+                      <span className="font-semibold">To:</span>{" "}
+                      {
+                        //@ts-ignore
+                        t.toUserId
+                      }
+                    </p>
+                  </>
+                )}
+              </div>
+            ))
+          )}
         </div>
       </div>
     </div>

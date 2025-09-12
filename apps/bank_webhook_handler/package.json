@@ -3,23 +3,19 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "dev": "tsx watch src/index.ts"
+    "dev": "tsx src/index.ts",
+    "start": "node dist/index.js",
+    "build": "tsc -b"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "@repo/db": "*",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.3",
     "cors": "^2.8.5",
+    "esbuild": "^0.25.9",
     "express": "^5.1.0"
-  },
-  "devDependencies": {
-    "@types/node": "^24.3.1",
-    "ts-node": "^10.9.2",
-    "tsx": "^4.20.5",
-    "typescript": "^5.9.2"
   }
 }

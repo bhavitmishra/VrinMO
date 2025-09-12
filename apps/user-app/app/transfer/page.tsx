@@ -27,8 +27,7 @@ export default function TransferPage() {
   const userId = session?.user?.id;
 
   const handlePay = async () => {
-    const res = await axios.post("/api/create-onramp-transaction", {
-      userId,
+    const res = await axios.post("/api/lib/actions/createOnRampTransactions", {
       amt,
     });
     const { onRampTransactionId } = res.data;
@@ -166,6 +165,7 @@ export default function TransferPage() {
         {/* Recent Transactions */}
         <div className="bg-white shadow-sm rounded-xl p-5">
           <h2 className="font-semibold text-lg mb-2">Recent transactions</h2>
+          <div></div>
           <button
             className="bg-purple-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-purple-600 transition"
             onClick={() => router.push("/transactions")}

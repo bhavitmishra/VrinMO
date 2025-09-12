@@ -1,8 +1,19 @@
 import { prisma } from "@repo/db";
 import { NextRequest, NextResponse } from "next/server";
 import { randomUUID } from "crypto";
+import { getServerSession } from "next-auth";
+import { Auth } from "../../auth";
 export async function POST(req: NextRequest) {
-  const { userId, amt } = await req.json();
+  const session = await getServerSession(Auth);
+  if (!session) {
+    return NextResponse.json({
+      message: "Secured Path, Login and Come Back",
+    });
+  }
+  //@ts-ignore
+  const userId = session?.user?.id;
+  const { amt } = await req.json();
+
   const onRampTransaction = await prisma.onRampTransaction.create({
     data: {
       user: {

@@ -3,7 +3,7 @@
 import { Bell, User } from "lucide-react";
 import AppBar from "@repo/ui/Appbar";
 import { getServerSession } from "next-auth";
-import { Auth } from "../app/api/auth/lib/auth";
+import { Auth } from "./api/lib/auth";
 
 export default async function Page() {
   const session = await getServerSession(Auth);
