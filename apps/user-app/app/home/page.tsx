@@ -4,7 +4,6 @@ import { prisma } from "@repo/db";
 import Link from "next/link";
 import Sidebar from "@repo/ui/Sidebar";
 
-// Helper to generate last 7 days totals
 function getWeeklyTrend(
   transactions: {
     timestamp: Date;
