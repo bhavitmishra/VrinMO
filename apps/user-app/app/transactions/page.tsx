@@ -3,6 +3,18 @@ import { getServerSession } from "next-auth";
 import { Auth } from "../api/lib/auth";
 import { prisma } from "@repo/db";
 import { redirect } from "next/navigation";
+import { ArrowDownRight, ArrowUpRight, Wallet } from "lucide-react";
+
+function formatAmount(type: string, amount: number) {
+  if (type === "p2p-sent") return `-₹${amount}`;
+  return `+₹${amount}`;
+}
+
+function formatColor(type: string) {
+  if (type === "p2p-sent") return "text-red-600";
+  if (type === "p2p-received") return "text-green-600";
+  return "text-blue-600";
+}
 
 export default async function TransactionPage() {
   const session = await getServerSession(Auth);
@@ -31,7 +43,7 @@ export default async function TransactionPage() {
     }),
   ]);
 
-  // Normalize date field for sorting
+  // Normalize
   const allTransactions = [
     ...onramps.map((t) => ({
       type: "onramp" as const,
@@ -53,70 +65,60 @@ export default async function TransactionPage() {
   return (
     <div className="flex min-h-screen bg-gray-50">
       {/* Sidebar */}
-      <div className="h-screen text-black border-r bg-white">
+      <div className="h-screen border-r bg-white">
         <Sidebar />
       </div>
 
-      {/* Main Content */}
+      {/* Main */}
       <div className="flex flex-1 flex-col mt-6 mx-8">
-        <h1 className="text-blue-600 font-extrabold text-4xl px-2">
+        <h1 className="text-blue-600 font-extrabold text-4xl mb-6">
           Transactions
         </h1>
 
-        <div className="mt-6 space-y-4">
-          {allTransactions.length === 0 ? (
-            <p className="text-gray-500">No transactions yet.</p>
-          ) : (
-            allTransactions.map((t) => (
-              <div
+        {allTransactions.length === 0 ? (
+          <p className="text-gray-500">No transactions yet.</p>
+        ) : (
+          <ul className="space-y-4">
+            {allTransactions.map((t) => (
+              <li
                 key={t.id}
-                className="p-4 border rounded-lg shadow-sm bg-white"
+                className="flex items-center justify-between p-4 rounded-xl bg-white shadow hover:shadow-md transition-shadow"
               >
-                <p>
-                  <span className="font-semibold">Type:</span> {t.type}
-                </p>
-                <p>
-                  <span className="font-semibold">Amount:</span> {t.amount}
-                </p>
-                <p>
-                  <span className="font-semibold">Date:</span>{" "}
-                  {t.date.toLocaleString()}
-                </p>
+                {/* Left side */}
+                <div className="flex items-center space-x-4">
+                  <div
+                    className={`p-3 rounded-full bg-gray-100 ${
+                      t.type === "onramp"
+                        ? "text-blue-500"
+                        : t.type === "p2p-sent"
+                          ? "text-red-500"
+                          : "text-green-600"
+                    }`}
+                  >
+                    {t.type === "onramp" && <Wallet className="w-6 h-6" />}
+                    {t.type === "p2p-sent" && (
+                      <ArrowUpRight className="w-6 h-6" />
+                    )}
+                    {t.type === "p2p-received" && (
+                      <ArrowDownRight className="w-6 h-6" />
+                    )}
+                  </div>
+                  <div>
+                    <p className="font-semibold capitalize">{t.type}</p>
+                    <p className="text-sm text-gray-500">
+                      {t.date.toLocaleString()}
+                    </p>
+                  </div>
+                </div>
 
-                {t.type === "onramp" && (
-                  <>
-                    <p>
-                      <span className="font-semibold">Provider:</span>{" "}
-                      {t.provider}
-                    </p>
-                    <p>
-                      <span className="font-semibold">Status:</span> {t.status}
-                    </p>
-                  </>
-                )}
-
-                {t.type.startsWith("p2p") && (
-                  <>
-                    <p>
-                      <span className="font-semibold">From:</span>{" "}
-                      {
-                        //@ts-ignore
-                        t.fromUserId
-                      }
-                    </p>
-                    <p>
-                      <span className="font-semibold">To:</span>{" "}
-                      {
-                        //@ts-ignore
-                        t.toUserId
-                      }
-                    </p>
-                  </>
-                )}
-              </div>
-            ))
-          )}
-        </div>
+                {/* Right side */}
+                <div className={`font-semibold text-lg ${formatColor(t.type)}`}>
+                  {formatAmount(t.type, t.amount)}
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
     </div>
   );

@@ -31,10 +31,7 @@ export default async function () {
               muted
               playsInline
             >
-              <source
-                src="https://videos.ctfassets.net/gkyt4bl1j2fs/176XGHpVphvQPk4FesazHF/0c326c29fea1645bd0a1b63e924f1854/venmo-everything-home.mp4"
-                type="video/mp4"
-              />
+              <source src="/finalVrinMO.mp4" type="video/mp4" />
               Your browser does not support the video tag.
             </video>
           </div>
