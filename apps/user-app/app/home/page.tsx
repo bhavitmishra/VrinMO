@@ -49,6 +49,8 @@ export default async function Home() {
 
   const userId = Number(session.user.id);
 
+  // testing ci pipeline
+
   try {
     const [balance, transactions] = await Promise.all([
       prisma.balance.findUnique({ where: { userId } }),
