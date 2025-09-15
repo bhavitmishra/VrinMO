@@ -20,13 +20,18 @@
     "@prisma/client": "^6.15.0"
   },
   "devDependencies": {
+    "@eslint/js": "^9.35.0",
     "@repo/eslint-config": "*",
     "@repo/typescript-config": "*",
-    "eslint": "^8.57.0",
+    "eslint": "^8.57.1",
+    "eslint-plugin-react": "^7.37.5",
+    "globals": "^13.24.0",
+    "jiti": "^2.5.1",
     "prisma": "^6.16.0",
     "rimraf": "^5.0.5",
     "tsup": "^8.0.2",
     "tsx": "4.19.1",
-    "typescript": "5.5.4"
+    "typescript": "5.5.4",
+    "typescript-eslint": "^8.43.0"
   }
 }

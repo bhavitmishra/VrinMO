@@ -1,24 +1,30 @@
 "use client";
 
-import { useSearchParams, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { useEffect, useState, Suspense } from "react";
 import axios from "axios";
 
-export default function TransactionPage() {
+interface TransactionData {
+  token: string;
+  amount: number;
+  userId: string;
+}
+
+function TransactionContent() {
   const searchParams = useSearchParams();
   const search = searchParams.get("id");
-  const router = useRouter();
 
-  const [data, setData] = useState<any>(null);
+  const [data, setData] = useState<TransactionData | null>(null);
   const [error, setError] = useState(false);
 
   const handlePay = async () => {
+    if (!data) return;
     await axios.post("http://localhost:6969/hdfcWebhook", {
       token: data.token,
       amount: data.amount,
       userId: data.userId,
     });
-    router.push("http://localhost:3000/home");
+    window.location.href = "http://localhost:3000/home";
   };
 
   useEffect(() => {
@@ -31,8 +37,7 @@ export default function TransactionPage() {
       .then((res) => {
         setData(res.data);
       })
-      .catch((e) => {
-        console.log(e);
+      .catch(() => {
         setError(true);
       });
   }, [search]);
@@ -102,5 +107,13 @@ export default function TransactionPage() {
         </div>
       </footer>
     </div>
+  );
+}
+
+export default function TransactionPage() {
+  return (
+    <Suspense fallback={<div>Loading search params...</div>}>
+      <TransactionContent />
+    </Suspense>
   );
 }

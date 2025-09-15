@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "public"."p2pTransfer" ADD COLUMN     "startTime" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP;

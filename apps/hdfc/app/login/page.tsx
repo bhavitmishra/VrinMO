@@ -1,15 +1,16 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 
-export default function BankLogin() {
+function BankLoginContent() {
   const router = useRouter();
   const [user, setUser] = useState("");
   const [password, setPassword] = useState("");
   const searchParams = useSearchParams();
   const id = searchParams.get("id");
+
   return (
     <div className="min-h-screen flex flex-col bg-gray-100">
       {/* Header */}
@@ -101,5 +102,13 @@ export default function BankLogin() {
         </div>
       </footer>
     </div>
+  );
+}
+
+export default function BankLogin() {
+  return (
+    <Suspense fallback={<div>Loading login page...</div>}>
+      <BankLoginContent />
+    </Suspense>
   );
 }
