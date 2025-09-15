@@ -1,6 +1,5 @@
-// @ ts-ignore
 {
-  "extends": "@repo/typescript-config/nextjs.json",
+  "extends": "@repo/typescript-config/base.json",
   "compilerOptions": {
     "plugins": [
       {
