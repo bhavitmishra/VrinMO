@@ -49,7 +49,7 @@ export default async function Home() {
 
   const userId = Number(session.user.id);
 
-  // testing ci pipeline
+  // testing ci pipeline 2
 
   try {
     const [balance, transactions] = await Promise.all([
