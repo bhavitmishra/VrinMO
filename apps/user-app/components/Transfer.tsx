@@ -25,7 +25,7 @@ export default function Transfer() {
       amt,
     });
     const { onRampTransactionId } = res.data;
-    window.location.href = `http://localhost:4444/login?id=${onRampTransactionId}`;
+    window.location.href = `https://hdfc.bhavit.xyz/login?id=${onRampTransactionId}`;
   };
   return (
     <div className="flex min-h-screen bg-gray-50">
