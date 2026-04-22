@@ -558,7 +558,7 @@ export default function Page() {
               >
                 <div className="vrinmo-badge">
                   <span className="vrinmo-badge-dot" />
-                  Live across India
+                  Developed by Bhavit Mishra
                 </div>
               </div>
 
