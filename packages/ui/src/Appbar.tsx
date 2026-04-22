@@ -1,172 +1,250 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
-import { User } from "lucide-react";
-
-// Minimal VrinMO Logo component
-const VrinmoLogo = () => (
-  <svg
-    width="150"
-    height="45"
-    viewBox="0 0 200 60"
-    xmlns="http://www.w3.org/2000/svg"
-    aria-label="VrinMO Digital Wallet"
-    className="drop-shadow-sm"
-  >
-    <defs>
-      <linearGradient
-        id="primaryGradient-minimal"
-        x1="0%"
-        y1="0%"
-        x2="100%"
-        y2="100%"
-      >
-        <stop offset="0%" style={{ stopColor: "#1F2937", stopOpacity: 1 }} />
-        <stop offset="100%" style={{ stopColor: "#374151", stopOpacity: 1 }} />
-      </linearGradient>
-
-      <linearGradient
-        id="accentGradient-minimal"
-        x1="0%"
-        y1="0%"
-        x2="100%"
-        y2="100%"
-      >
-        <stop offset="0%" style={{ stopColor: "#6366F1", stopOpacity: 1 }} />
-        <stop offset="100%" style={{ stopColor: "#4F46E5", stopOpacity: 1 }} />
-      </linearGradient>
-
-      <filter id="glow-minimal">
-        <feGaussianBlur stdDeviation="2" result="coloredBlur" />
-        <feMerge>
-          <feMergeNode in="coloredBlur" />
-          <feMergeNode in="SourceGraphic" />
-        </feMerge>
-      </filter>
-    </defs>
-
-    <g transform="translate(5, 8)">
-      {/* Wallet/Card Background */}
-      <rect
-        x="2"
-        y="0"
-        width="36"
-        height="36"
-        rx="6"
-        fill="url(#primaryGradient-minimal)"
-        opacity="0.1"
-      />
-
-      {/* Main V Shape */}
-      <path
-        d="M8 12 L20 38 L32 12 L28 12 L20 28 L12 12 Z"
-        fill="url(#primaryGradient-minimal)"
-        filter="url(#glow-minimal)"
-      />
-
-      {/* Accent Elements - representing digital transactions */}
-      <circle
-        cx="35"
-        cy="16"
-        r="2"
-        fill="url(#accentGradient-minimal)"
-        opacity="0.8"
-      />
-      <circle
-        cx="38"
-        cy="20"
-        r="1.5"
-        fill="url(#accentGradient-minimal)"
-        opacity="0.6"
-      />
-      <circle
-        cx="33"
-        cy="24"
-        r="1"
-        fill="url(#accentGradient-minimal)"
-        opacity="0.4"
-      />
-
-      {/* Digital Flow Lines */}
-      <path
-        d="M36 18 Q40 20 38 24"
-        stroke="url(#accentGradient-minimal)"
-        strokeWidth="1.5"
-        fill="none"
-        opacity="0.5"
-      />
-    </g>
-
-    {/* Company Name */}
-    <text
-      x="55"
-      y="25"
-      fontFamily="Inter, -apple-system, BlinkMacSystemFont, sans-serif"
-      fontSize="25"
-      fontWeight="700"
-      letterSpacing="-0.02em"
-      fill="#1F2937"
-    >
-      VrinMO
-    </text>
-
-    {/* Tagline */}
-    <text
-      x="55"
-      y="44"
-      fontFamily="Inter, -apple-system, BlinkMacSystemFont, sans-serif"
-      fontSize="8"
-      fontWeight="500"
-      letterSpacing="0.1em"
-      fill="#6B7280"
-      opacity="0.8"
-    >
-      DIGITAL WALLET
-    </text>
-  </svg>
-);
 
 export const AppBar = () => {
   const { data: session, status } = useSession();
   const router = useRouter();
-
   const isLoggedIn = !!session;
 
-  return (
-    <header className="ui:bg-white ui:shadow-sm ui:sticky ui:top-0 ui:z-50">
-      <nav className="ui:container ui:mx-auto ui:px-6 ui:py-4 ui:flex ui:justify-between ui:items-center">
-        {/* Logo */}
-        <Link href="/" aria-label="VrinMO Home">
-          <VrinmoLogo />
-        </Link>
+  const [scrolled, setScrolled] = useState(false);
+  useEffect(() => {
+    const handler = () => setScrolled(window.scrollY > 12);
+    window.addEventListener("scroll", handler, { passive: true });
+    return () => window.removeEventListener("scroll", handler);
+  }, []);
 
-        {/* Right Actions */}
-        <div>
-          {status === "loading" ? (
-            <span className="ui:text-gray-500">Loading...</span>
-          ) : isLoggedIn ? (
-            <button
-              onClick={() => signOut({ callbackUrl: "/" })}
-              className="ui:flex ui:items-center ui:space-x-2 ui:px-5 ui:py-2.5 ui:font-semibold ui:text-blue-500 ui:border-2 ui:border-blue-500 ui:rounded-full ui:transition-colors ui:duration-200 ui:hover:bg-blue-50"
-            >
-              <User className="ui:w-5 ui:h-5" />
-              <span>Log out</span>
-            </button>
-          ) : (
-            <button
-              onClick={() => router.push("/signin")}
-              className="ui:flex ui:items-center ui:space-x-2 ui:px-5 ui:py-2.5 ui:font-semibold ui:text-blue-500 ui:border-2 ui:border-blue-500 ui:rounded-full ui:transition-colors ui:duration-200 ui:hover:bg-blue-50"
-            >
-              <User className="ui:w-5 ui:h-5" />
-              <span>Log in</span>
-            </button>
-          )}
+  return (
+    <>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@400;500&display=swap');
+
+        .vrinmo-appbar {
+          position: sticky;
+          top: 0;
+          z-index: 100;
+          width: 100%;
+          background: rgba(253, 252, 250, 0.92);
+          backdrop-filter: blur(16px);
+          -webkit-backdrop-filter: blur(16px);
+          transition: border-color 0.35s ease, box-shadow 0.35s ease;
+        }
+        .vrinmo-appbar.scrolled {
+          border-bottom: 1px solid rgba(0, 0, 0, 0.07);
+          box-shadow: 0 1px 24px rgba(0, 0, 0, 0.04);
+        }
+        .vrinmo-appbar-inner {
+          max-width: 1200px;
+          margin: 0 auto;
+          padding: 0 2rem;
+          height: 68px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+        }
+
+        /* ── Logo ── */
+        .vrinmo-logo {
+          display: flex;
+          align-items: center;
+          gap: 0.35rem;
+          text-decoration: none;
+          user-select: none;
+        }
+        .vrinmo-logo-wordmark {
+          font-family: 'Playfair Display', serif;
+          font-size: 1.45rem;
+          font-weight: 700;
+          color: #111;
+          letter-spacing: -0.025em;
+          line-height: 1;
+        }
+        .vrinmo-logo-dot {
+          width: 6px;
+          height: 6px;
+          border-radius: 50%;
+          background: #d4a843;
+          flex-shrink: 0;
+          margin-bottom: -1px;
+        }
+
+        /* ── Nav links (center) ── */
+        .vrinmo-nav-links {
+          display: flex;
+          align-items: center;
+          gap: 2.5rem;
+          list-style: none;
+          margin: 0;
+          padding: 0;
+        }
+        .vrinmo-nav-links a {
+          font-family: 'DM Sans', sans-serif;
+          font-size: 0.875rem;
+          font-weight: 400;
+          color: #555;
+          text-decoration: none;
+          letter-spacing: 0.01em;
+          position: relative;
+          transition: color 0.2s;
+        }
+        .vrinmo-nav-links a::after {
+          content: '';
+          position: absolute;
+          bottom: -3px;
+          left: 0;
+          right: 100%;
+          height: 1px;
+          background: #d4a843;
+          transition: right 0.25s ease;
+        }
+        .vrinmo-nav-links a:hover {
+          color: #111;
+        }
+        .vrinmo-nav-links a:hover::after {
+          right: 0;
+        }
+
+        /* ── Auth button ── */
+        .vrinmo-auth-btn {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.45rem;
+          font-family: 'DM Sans', sans-serif;
+          font-size: 0.875rem;
+          font-weight: 500;
+          letter-spacing: 0.01em;
+          cursor: pointer;
+          border: none;
+          background: none;
+          padding: 0;
+          color: #111;
+          transition: opacity 0.2s;
+        }
+        .vrinmo-auth-btn:hover {
+          opacity: 0.65;
+        }
+        .vrinmo-auth-btn-pill {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.45rem;
+          font-family: 'DM Sans', sans-serif;
+          font-size: 0.875rem;
+          font-weight: 500;
+          letter-spacing: 0.01em;
+          cursor: pointer;
+          border: 1.5px solid #111;
+          background: #111;
+          color: #fdfcfa;
+          padding: 0.5rem 1.25rem;
+          border-radius: 999px;
+          transition: background 0.2s, color 0.2s, border-color 0.2s;
+        }
+        .vrinmo-auth-btn-pill:hover {
+          background: transparent;
+          color: #111;
+        }
+
+        /* ── Avatar dot ── */
+        .vrinmo-avatar {
+          width: 32px;
+          height: 32px;
+          border-radius: 50%;
+          background: #f0ebe0;
+          border: 1.5px solid rgba(0,0,0,0.1);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex-shrink: 0;
+        }
+        .vrinmo-avatar svg {
+          width: 15px;
+          height: 15px;
+          stroke: #555;
+          fill: none;
+          stroke-width: 1.8;
+          stroke-linecap: round;
+          stroke-linejoin: round;
+        }
+
+        /* ── Loading skeleton ── */
+        .vrinmo-skeleton {
+          width: 80px;
+          height: 34px;
+          border-radius: 999px;
+          background: linear-gradient(90deg, #f0ece4 25%, #e8e2d6 50%, #f0ece4 75%);
+          background-size: 200% 100%;
+          animation: vrinmo-shimmer 1.4s infinite;
+        }
+        @keyframes vrinmo-shimmer {
+          0% { background-position: 200% 0; }
+          100% { background-position: -200% 0; }
+        }
+
+        @media (max-width: 640px) {
+          .vrinmo-nav-links { display: none; }
+          .vrinmo-appbar-inner { padding: 0 1.25rem; }
+        }
+      `}</style>
+
+      <header className={`vrinmo-appbar${scrolled ? " scrolled" : ""}`}>
+        <div className="vrinmo-appbar-inner">
+
+          {/* Logo */}
+          <Link href="/" className="vrinmo-logo" aria-label="Vrinmo Home">
+            <span className="vrinmo-logo-wordmark">Vrinmo</span>
+            <span className="vrinmo-logo-dot" aria-hidden="true" />
+          </Link>
+
+          {/*gjjj*/}
+          {/* Nav links */}
+          <nav aria-label="Main navigation">
+            <ul className="vrinmo-nav-links">
+              <li><a href="#">Features</a></li>
+              <li><a href="#">How it works</a></li>
+              <li><a href="#">Security</a></li>
+            </ul>
+          </nav>
+
+          {/* Auth */}
+          <div>
+            {status === "loading" ? (
+              <div className="vrinmo-skeleton" aria-hidden="true" />
+            ) : isLoggedIn ? (
+              <button
+                className="vrinmo-auth-btn"
+                onClick={() => signOut({ callbackUrl: "/" })}
+                aria-label="Log out"
+              >
+                <div className="vrinmo-avatar">
+                  {/* user icon */}
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                    <circle cx="12" cy="7" r="4" />
+                  </svg>
+                </div>
+                <span>Log out</span>
+              </button>
+            ) : (
+              <button
+                className="vrinmo-auth-btn-pill"
+                onClick={() => router.push("/signin")}
+              >
+                {/* user icon */}
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                  <circle cx="12" cy="7" r="4" />
+                </svg>
+                Log In
+              </button>
+            )}
+          </div>
+
         </div>
-      </nav>
-    </header>
+      </header>
+    </>
   );
 };
 

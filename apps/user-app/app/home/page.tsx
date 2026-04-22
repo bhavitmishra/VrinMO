@@ -19,7 +19,7 @@ function getWeeklyTrend(
   for (let i = 6; i >= 0; i--) {
     const day = new Date(today);
     day.setDate(today.getDate() - i);
-    day.setHours(0, 0, 0, 0); // Reset time for accurate date comparison
+    day.setHours(0, 0, 0, 0);
 
     const dayTotal = transactions
       .filter((t) => {
@@ -44,12 +44,27 @@ export default async function Home() {
   const session = await getServerSession(Auth);
 
   if (!session?.user?.id) {
-    return <p className="p-6 text-red-500">Not logged in</p>;
+    return (
+      <>
+        <style>{`
+          @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@300;400;500&display=swap');
+        `}</style>
+        <div style={{
+          minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center",
+          background: "#fdfcfa", fontFamily: "'DM Sans', sans-serif",
+        }}>
+          <div style={{
+            background: "#fff5f5", border: "1px solid rgba(220,38,38,0.12)",
+            borderRadius: "1.25rem", padding: "2rem 2.5rem", textAlign: "center",
+          }}>
+            <p style={{ color: "#dc2626", fontSize: "0.95rem" }}>You're not logged in.</p>
+          </div>
+        </div>
+      </>
+    );
   }
 
   const userId = Number(session.user.id);
-
-  // testing ci pipeline
 
   try {
     const [balance, transactions] = await Promise.all([
@@ -57,7 +72,7 @@ export default async function Home() {
       prisma.p2pTransfer.findMany({
         where: { OR: [{ fromUserId: userId }, { toUserId: userId }] },
         orderBy: { timestamp: "desc" },
-        take: 50, // Limit to prevent performance issues
+        take: 50,
       }),
     ]);
 
@@ -73,184 +88,506 @@ export default async function Home() {
 
     const lastTransaction = transactions[0];
     const recentTransactions = transactions.slice(0, 3);
-
     const weeklyTrend = getWeeklyTrend(transactions, userId);
-
-    // Calculate max value for trend chart scaling
     const maxTrendValue = Math.max(...weeklyTrend.map(Math.abs), 1);
 
     return (
-      <div className="flex min-h-screen bg-gray-50">
-        <div className="h-screen text-black border-r bg-white sticky top-0">
-          <Sidebar />
-        </div>
+      <>
+        <style>{`
+          @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500&display=swap');
 
-        <div className="flex-1 flex flex-col p-8 space-y-8 overflow-y-auto">
-          {/* Wallet Balance */}
-          <div className="bg-white rounded-2xl shadow-md p-6">
-            <h2 className="text-gray-500 font-semibold">Wallet Balance</h2>
-            <p className="text-4xl font-bold text-blue-600 mt-2">
-              ₹ {balanceAmount.toLocaleString("en-IN")}
-            </p>
+          * { box-sizing: border-box; margin: 0; padding: 0; }
+
+          :root {
+            --cream:  #fdfcfa;
+            --ink:    #111;
+            --muted:  #777;
+            --faint:  #f4f1eb;
+            --border: rgba(0,0,0,0.07);
+            --amber:  #d4a843;
+            --amber-light: rgba(212,168,67,0.1);
+            --green:  #16a34a;
+            --red:    #dc2626;
+            --radius: 1.5rem;
+          }
+
+          body { background: var(--cream); }
+
+          .vr-shell {
+            display: flex;
+            min-height: 100vh;
+            background: var(--cream);
+            font-family: 'DM Sans', sans-serif;
+          }
+
+          /* sidebar wrapper */
+          .vr-sidebar-wrap {
+            height: 100vh;
+            position: sticky;
+            top: 0;
+            background: #fff;
+            border-right: 1px solid var(--border);
+            flex-shrink: 0;
+          }
+
+          /* main scroll area */
+          .vr-main {
+            flex: 1;
+            overflow-y: auto;
+            padding: 2.5rem 2.25rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            max-width: 960px;
+          }
+
+          /* page title */
+          .vr-page-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--ink);
+            letter-spacing: -0.025em;
+            line-height: 1;
+            margin-bottom: 0.25rem;
+          }
+          .vr-page-sub {
+            font-size: 0.875rem;
+            color: var(--muted);
+          }
+
+          /* card base */
+          .vr-card {
+            background: #fff;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.75rem;
+          }
+
+          /* balance card */
+          .vr-balance-card {
+            background: var(--ink);
+            border: none;
+            border-radius: var(--radius);
+            padding: 2rem 2rem 1.75rem;
+            position: relative;
+            overflow: hidden;
+          }
+          .vr-balance-card::before {
+            content: '';
+            position: absolute;
+            top: -40%;
+            right: -10%;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(212,168,67,0.15) 0%, transparent 65%);
+            pointer-events: none;
+          }
+          .vr-balance-label {
+            font-size: 0.72rem;
+            font-weight: 500;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: rgba(253,252,250,0.45);
+            margin-bottom: 0.6rem;
+          }
+          .vr-balance-amount {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2.25rem, 4vw, 3rem);
+            font-weight: 900;
+            color: #fdfcfa;
+            letter-spacing: -0.03em;
+            line-height: 1;
+          }
+          .vr-balance-amount span {
+            font-size: 0.55em;
+            opacity: 0.5;
+            margin-right: 0.2em;
+            font-weight: 400;
+          }
+          .vr-balance-meta {
+            margin-top: 1.5rem;
+            display: flex;
+            gap: 1.5rem;
+          }
+          .vr-balance-meta-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.2rem;
+          }
+          .vr-balance-meta-label {
+            font-size: 0.7rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: rgba(253,252,250,0.35);
+          }
+          .vr-balance-meta-value {
+            font-size: 0.925rem;
+            font-weight: 500;
+            color: rgba(253,252,250,0.75);
+          }
+
+          /* quick actions */
+          .vr-actions-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.875rem;
+          }
+          @media (max-width: 600px) { .vr-actions-grid { grid-template-columns: 1fr; } }
+
+          .vr-action-link {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 1rem;
+            border-radius: 1rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            font-family: 'DM Sans', sans-serif;
+            text-decoration: none;
+            transition: opacity 0.2s, transform 0.15s;
+            letter-spacing: 0.01em;
+          }
+          .vr-action-link:hover { opacity: 0.85; transform: translateY(-1px); }
+
+          .vr-action-send {
+            background: var(--ink);
+            color: #fdfcfa;
+            border: 1.5px solid var(--ink);
+          }
+          .vr-action-add {
+            background: var(--amber-light);
+            color: #9a7520;
+            border: 1.5px solid rgba(212,168,67,0.25);
+          }
+          .vr-action-history {
+            background: var(--faint);
+            color: var(--ink);
+            border: 1.5px solid var(--border);
+          }
+
+          /* section header */
+          .vr-section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 1.25rem;
+          }
+          .vr-section-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--ink);
+            letter-spacing: -0.015em;
+          }
+          .vr-section-link {
+            font-size: 0.8rem;
+            color: var(--amber);
+            text-decoration: none;
+            font-weight: 500;
+            transition: opacity 0.2s;
+          }
+          .vr-section-link:hover { opacity: 0.7; }
+
+          /* trend chart */
+          .vr-trend-bars {
+            display: flex;
+            align-items: flex-end;
+            gap: 0.5rem;
+            height: 80px;
+          }
+          .vr-trend-col {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.4rem;
+            height: 100%;
+            justify-content: flex-end;
+          }
+          .vr-trend-bar {
+            width: 100%;
+            border-radius: 4px 4px 0 0;
+            min-height: 4px;
+            transition: height 0.4s ease;
+          }
+          .vr-trend-label {
+            font-size: 0.65rem;
+            color: var(--muted);
+            letter-spacing: 0.04em;
+            white-space: nowrap;
+          }
+
+          /* stats grid */
+          .vr-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+          }
+          @media (max-width: 600px) { .vr-stats-grid { grid-template-columns: 1fr; } }
+
+          .vr-stat-tile {
+            background: var(--faint);
+            border: 1px solid var(--border);
+            border-radius: 1.125rem;
+            padding: 1.25rem 1rem;
+            text-align: center;
+          }
+          .vr-stat-label {
+            font-size: 0.72rem;
+            font-weight: 500;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 0.5rem;
+          }
+          .vr-stat-value {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.35rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            line-height: 1;
+          }
+
+          /* tx list */
+          .vr-tx-list { display: flex; flex-direction: column; gap: 0.625rem; }
+
+          .vr-tx-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 1.25rem;
+            background: var(--faint);
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            transition: border-color 0.2s;
+          }
+          .vr-tx-item:hover { border-color: rgba(212,168,67,0.3); }
+
+          .vr-tx-icon {
+            width: 36px; height: 36px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+            margin-right: 0.875rem;
+            font-size: 0.875rem;
+          }
+          .vr-tx-icon-sent { background: rgba(220,38,38,0.08); color: var(--red); }
+          .vr-tx-icon-recv { background: rgba(22,163,74,0.08); color: var(--green); }
+
+          .vr-tx-left { display: flex; align-items: center; }
+          .vr-tx-type {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--ink);
+          }
+          .vr-tx-date {
+            font-size: 0.75rem;
+            color: var(--muted);
+            margin-top: 0.15rem;
+          }
+          .vr-tx-amount {
+            font-family: 'Playfair Display', serif;
+            font-size: 1rem;
+            font-weight: 700;
+            letter-spacing: -0.01em;
+          }
+
+          .vr-empty {
+            text-align: center;
+            padding: 2.5rem 1rem;
+            font-size: 0.875rem;
+            color: var(--muted);
+          }
+        `}</style>
+
+        <div className="vr-shell">
+          {/* Sidebar */}
+          <div className="vr-sidebar-wrap">
+            <Sidebar />
           </div>
 
-          {/* Quick Actions */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <Link
-              href="/p2p"
-              className="bg-blue-600 hover:bg-blue-700 text-white text-center py-4 rounded-xl shadow transition-colors duration-200"
-            >
-              Send Money
-            </Link>
-            <Link
-              href="/transfer"
-              className="bg-green-600 hover:bg-green-700 text-white text-center py-4 rounded-xl shadow transition-colors duration-200"
-            >
-              Add Money
-            </Link>
-            <Link
-              href="/transactions"
-              className="bg-gray-800 hover:bg-gray-900 text-white text-center py-4 rounded-xl shadow transition-colors duration-200"
-            >
-              View Transactions
-            </Link>
-          </div>
+          {/* Main */}
+          <div className="vr-main">
 
-          {/* Weekly Trend Bars */}
-          <div className="bg-white rounded-2xl shadow-md p-6">
-            <h2 className="text-lg font-semibold mb-4">Last 7 Days Activity</h2>
-            <div className="flex items-end justify-center h-32 space-x-3 px-4">
-              {weeklyTrend.map((amt, idx) => {
-                const isPositive = amt >= 0;
-                const height = Math.max(
-                  (Math.abs(amt) / maxTrendValue) * 80,
-                  4
-                ); // Scale to max 80px
-
-                return (
-                  <div key={idx} className="flex flex-col items-center">
-                    <div
-                      className={`${
-                        isPositive ? "bg-green-500" : "bg-red-500"
-                      } rounded-t-md transition-all duration-300 min-h-[4px] w-8`}
-                      style={{ height: `${height}px` }}
-                      title={`₹ ${amt.toLocaleString("en-IN")}`}
-                    />
-                  </div>
-                );
-              })}
+            {/* Page header */}
+            <div>
+              <h1 className="vr-page-title">Dashboard</h1>
+              <p className="vr-page-sub">Welcome back — here's your overview</p>
             </div>
-            <div className="flex justify-center space-x-3 mt-3 text-xs text-gray-500">
-              {["6d", "5d", "4d", "3d", "2d", "1d", "Today"].map(
-                (label, idx) => (
-                  <span key={idx} className="w-8 text-center">
-                    {label}
-                  </span>
-                )
-              )}
-            </div>
-          </div>
 
-          {/* Summary / Stats */}
-          <div className="bg-white rounded-2xl shadow-md p-6 grid grid-cols-1 sm:grid-cols-3 gap-6">
-            <div className="p-4 bg-blue-50 rounded-lg text-center">
-              <h3 className="text-gray-500 font-medium">Total Sent</h3>
-              <p className="text-xl font-bold text-blue-600 mt-2">
-                ₹ {totalSent.toLocaleString("en-IN")}
+            {/* Balance card */}
+            <div className="vr-balance-card">
+              <p className="vr-balance-label">Wallet Balance</p>
+              <p className="vr-balance-amount">
+                <span>₹</span>
+                {balanceAmount.toLocaleString("en-IN")}
               </p>
-            </div>
-            <div className="p-4 bg-green-50 rounded-lg text-center">
-              <h3 className="text-gray-500 font-medium">Total Received</h3>
-              <p className="text-xl font-bold text-green-600 mt-2">
-                ₹ {totalReceived.toLocaleString("en-IN")}
-              </p>
-            </div>
-            <div className="p-4 bg-gray-50 rounded-lg text-center">
-              <h3 className="text-gray-500 font-medium">Last Transaction</h3>
-              {lastTransaction ? (
-                <div className="mt-2">
-                  <p
-                    className={`text-lg font-semibold ${
-                      lastTransaction.fromUserId === userId
-                        ? "text-red-600"
-                        : "text-green-600"
-                    }`}
-                  >
-                    {lastTransaction.fromUserId === userId
-                      ? "Sent"
-                      : "Received"}{" "}
-                    ₹{lastTransaction.amount.toLocaleString("en-IN")}
-                  </p>
-                  <p className="text-sm text-gray-500 mt-1">
-                    {lastTransaction.timestamp.toLocaleDateString("en-IN")}
-                  </p>
+              <div className="vr-balance-meta">
+                <div className="vr-balance-meta-item">
+                  <span className="vr-balance-meta-label">Total Sent</span>
+                  <span className="vr-balance-meta-value">₹{totalSent.toLocaleString("en-IN")}</span>
                 </div>
-              ) : (
-                <p className="text-gray-400 mt-2">No transactions yet</p>
-              )}
+                <div className="vr-balance-meta-item">
+                  <span className="vr-balance-meta-label">Total Received</span>
+                  <span className="vr-balance-meta-value">₹{totalReceived.toLocaleString("en-IN")}</span>
+                </div>
+              </div>
             </div>
-          </div>
 
-          {/* Recent Transactions */}
-          <div className="bg-white rounded-2xl shadow-md p-6">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-semibold">Recent Transactions</h2>
-              <Link
-                href="/transactions"
-                className="text-blue-600 hover:text-blue-800 text-sm font-medium"
-              >
-                View All
+            {/* Quick actions */}
+            <div className="vr-actions-grid">
+              <Link href="/p2p" className="vr-action-link vr-action-send">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="22" y1="2" x2="11" y2="13" /><polygon points="22 2 15 22 11 13 2 9 22 2" />
+                </svg>
+                Send Money
+              </Link>
+              <Link href="/transfer" className="vr-action-link vr-action-add">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="16" /><line x1="8" y1="12" x2="16" y2="12" />
+                </svg>
+                Add Money
+              </Link>
+              <Link href="/transactions" className="vr-action-link vr-action-history">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+                </svg>
+                Transactions
               </Link>
             </div>
-            {recentTransactions.length === 0 ? (
-              <p className="text-gray-500 text-center py-8">
-                No transactions yet.
-              </p>
-            ) : (
-              <ul className="space-y-3">
-                {recentTransactions.map((t) => (
-                  <li
-                    key={t.id}
-                    className="flex justify-between items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors duration-200"
-                  >
-                    <div className="flex flex-col">
-                      <span
-                        className={`font-medium ${
-                          t.fromUserId === userId
-                            ? "text-red-600"
-                            : "text-green-600"
-                        }`}
-                      >
-                        {t.fromUserId === userId ? "Sent" : "Received"} ₹
-                        {t.amount.toLocaleString("en-IN")}
-                      </span>
-                      <span className="text-sm text-gray-500 mt-1">
-                        {t.timestamp.toLocaleDateString("en-IN")} at{" "}
-                        {t.timestamp.toLocaleTimeString("en-IN", {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}
+
+            {/* Weekly trend */}
+            <div className="vr-card">
+              <div className="vr-section-header">
+                <h2 className="vr-section-title">7-Day Activity</h2>
+              </div>
+              <div className="vr-trend-bars">
+                {weeklyTrend.map((amt, idx) => {
+                  const isPositive = amt >= 0;
+                  const height = Math.max((Math.abs(amt) / maxTrendValue) * 72, 4);
+                  return (
+                    <div key={idx} className="vr-trend-col">
+                      <div
+                        className="vr-trend-bar"
+                        style={{
+                          height: `${height}px`,
+                          background: isPositive
+                            ? "rgba(22,163,74,0.55)"
+                            : "rgba(220,38,38,0.45)",
+                        }}
+                        title={`₹ ${amt.toLocaleString("en-IN")}`}
+                      />
+                      <span className="vr-trend-label">
+                        {["6d","5d","4d","3d","2d","1d","Today"][idx]}
                       </span>
                     </div>
-                  </li>
-                ))}
-              </ul>
-            )}
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Stats */}
+            <div className="vr-stats-grid">
+              <div className="vr-stat-tile">
+                <p className="vr-stat-label">Total Sent</p>
+                <p className="vr-stat-value" style={{ color: "var(--red)" }}>
+                  ₹{totalSent.toLocaleString("en-IN")}
+                </p>
+              </div>
+              <div className="vr-stat-tile">
+                <p className="vr-stat-label">Total Received</p>
+                <p className="vr-stat-value" style={{ color: "var(--green)" }}>
+                  ₹{totalReceived.toLocaleString("en-IN")}
+                </p>
+              </div>
+              <div className="vr-stat-tile">
+                <p className="vr-stat-label">Last Transaction</p>
+                {lastTransaction ? (
+                  <>
+                    <p className="vr-stat-value" style={{
+                      color: lastTransaction.fromUserId === userId ? "var(--red)" : "var(--green)",
+                    }}>
+                      {lastTransaction.fromUserId === userId ? "−" : "+"}₹{lastTransaction.amount.toLocaleString("en-IN")}
+                    </p>
+                    <p style={{ fontSize: "0.72rem", color: "var(--muted)", marginTop: "0.3rem" }}>
+                      {lastTransaction.timestamp.toLocaleDateString("en-IN")}
+                    </p>
+                  </>
+                ) : (
+                  <p style={{ fontSize: "0.8rem", color: "var(--muted)", marginTop: "0.4rem" }}>None yet</p>
+                )}
+              </div>
+            </div>
+
+            {/* Recent transactions */}
+            <div className="vr-card">
+              <div className="vr-section-header">
+                <h2 className="vr-section-title">Recent Transactions</h2>
+                <Link href="/transactions" className="vr-section-link">View all →</Link>
+              </div>
+
+              {recentTransactions.length === 0 ? (
+                <div className="vr-empty">No transactions yet.</div>
+              ) : (
+                <ul className="vr-tx-list">
+                  {recentTransactions.map((t) => {
+                    const isSent = t.fromUserId === userId;
+                    return (
+                      <li key={t.id} className="vr-tx-item">
+                        <div className="vr-tx-left">
+                          <div className={`vr-tx-icon ${isSent ? "vr-tx-icon-sent" : "vr-tx-icon-recv"}`}>
+                            {isSent ? (
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                                <line x1="7" y1="17" x2="17" y2="7" /><polyline points="7 7 17 7 17 17" />
+                              </svg>
+                            ) : (
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                                <line x1="17" y1="7" x2="7" y2="17" /><polyline points="17 17 7 17 7 7" />
+                              </svg>
+                            )}
+                          </div>
+                          <div>
+                            <p className="vr-tx-type">{isSent ? "Sent" : "Received"}</p>
+                            <p className="vr-tx-date">
+                              {t.timestamp.toLocaleDateString("en-IN")} · {t.timestamp.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })}
+                            </p>
+                          </div>
+                        </div>
+                        <span className="vr-tx-amount" style={{ color: isSent ? "var(--red)" : "var(--green)" }}>
+                          {isSent ? "−" : "+"}₹{t.amount.toLocaleString("en-IN")}
+                        </span>
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
+            </div>
+
           </div>
         </div>
-      </div>
+      </>
     );
   } catch (error) {
     console.error("Dashboard error:", error);
     return (
-      <div className="flex min-h-screen bg-gray-50 items-center justify-center">
-        <div className="bg-white rounded-lg shadow-md p-8 text-center">
-          <h2 className="text-xl font-semibold text-red-600 mb-2">
-            Error Loading Dashboard
-          </h2>
-          <p className="text-gray-600">Please try refreshing the page.</p>
+      <>
+        <style>{`@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500&display=swap');`}</style>
+        <div style={{
+          minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center",
+          background: "#fdfcfa", fontFamily: "'DM Sans', sans-serif",
+        }}>
+          <div style={{
+            background: "#fff", border: "1px solid rgba(0,0,0,0.07)",
+            borderRadius: "1.5rem", padding: "2.5rem 3rem", textAlign: "center",
+            boxShadow: "0 4px 24px rgba(0,0,0,0.06)",
+          }}>
+            <p style={{ fontSize: "1rem", fontWeight: 500, color: "#dc2626", marginBottom: "0.5rem" }}>Error loading dashboard</p>
+            <p style={{ fontSize: "0.875rem", color: "#888" }}>Please try refreshing the page.</p>
+          </div>
         </div>
-      </div>
+      </>
     );
   }
 }

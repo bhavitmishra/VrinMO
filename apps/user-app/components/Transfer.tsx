@@ -1,173 +1,301 @@
 "use client";
-import Sidebar from "@repo/ui/Sidebar";
-import {
-  ArrowDownToLine,
-  ArrowUpFromLine,
-  CreditCard,
-  Landmark,
-} from "lucide-react";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
-
+import Sidebar from "@repo/ui/Sidebar";
 import axios from "axios";
+import { useRouter } from "next/navigation";
+import { 
+  ArrowDownToLine, 
+  ArrowUpFromLine, 
+  CreditCard, 
+  Landmark, 
+  Lock 
+} from "lucide-react";
 
 export default function Transfer() {
   const router = useRouter();
-  const methods = [
-    { name: "UPI Options", icon: Landmark },
-    { name: "NetBanking", icon: CreditCard },
-  ];
-  const [active, setActive] = useState("NetBanking");
-  const [activeTab, setActiveTab] = useState("deposit");
+  const [activeTab, setActiveTab] = useState<"deposit" | "withdraw">("deposit");
+  const [method, setMethod] = useState("NetBanking");
   const [amt, setAmt] = useState(0);
+  const [loading, setLoading] = useState(false);
+
+  const methods = [
+    { name: "NetBanking", icon: CreditCard },
+    { name: "UPI Options", icon: Landmark },
+  ];
+
   const handlePay = async () => {
-    const res = await axios.post("/api/lib/actions/createOnRampTransactions", {
-      amt,
-    });
-    const { onRampTransactionId } = res.data;
-    window.location.href = `https://hdfc.bhavit.xyz/login?id=${onRampTransactionId}`;
+    try {
+      setLoading(true);
+      const res = await axios.post("/api/lib/actions/createOnRampTransactions", { amt });
+      const { onRampTransactionId } = res.data;
+      window.location.href = `https://hdfc.bhavit.xyz/login?id=${onRampTransactionId}`;
+    } catch (err) {
+      console.error(err);
+      setLoading(false);
+    }
   };
+
   return (
-    <div className="flex min-h-screen bg-gray-50">
-      {/* Sidebar */}
-      <div className="h-screen text-black border-r bg-white">
-        <Sidebar />
-      </div>
+    <>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500&display=swap');
 
-      {/* Main Content */}
-      <div className="flex flex-1 flex-col mt-6 mx-8">
-        {/* Page Header */}
-        <h1 className="text-blue-600 font-extrabold text-4xl px-2">Transfer</h1>
+        :root {
+          --cream:  #fdfcfa;
+          --ink:    #111;
+          --muted:  #777;
+          --faint:  #f4f1eb;
+          --border: rgba(0,0,0,0.07);
+          --amber:  #d4a843;
+          --radius: 1.5rem;
+        }
 
-        {/* Deposit / Withdraw Toggle */}
-        <div className="flex items-center gap-4 mt-6">
-          <button
-            onClick={() => setActiveTab("deposit")}
-            className={`flex items-center gap-2 px-6 py-2 rounded-full font-medium transition shadow-sm 
-            ${
-              activeTab === "deposit"
-                ? "bg-blue-500 text-white"
-                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-            }`}
-          >
-            <ArrowDownToLine className="w-5 h-5" /> Deposit
-          </button>
-          <button
-            onClick={() => setActiveTab("withdraw")}
-            className={`flex items-center gap-2 px-6 py-2 rounded-full font-medium transition shadow-sm 
-            ${
-              activeTab === "withdraw"
-                ? "bg-blue-500 text-white"
-                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-            }`}
-          >
-            <ArrowUpFromLine className="w-5 h-5" /> Withdraw
-          </button>
+        .vr-shell {
+          display: flex;
+          min-height: 100vh;
+          background: var(--cream);
+          font-family: 'DM Sans', sans-serif;
+        }
+
+        .vr-sidebar-wrap {
+          height: 100vh;
+          position: sticky;
+          top: 0;
+          background: #fff;
+          border-right: 1px solid var(--border);
+          flex-shrink: 0;
+        }
+
+        .vr-container {
+          display: grid;
+          grid-template-columns: 1fr 350px;
+          gap: 2.5rem;
+          padding: 3.5rem 2.5rem;
+          width: 100%;
+          max-width: 1400px;
+          margin: 0 auto;
+        }
+
+        .vr-page-header { margin-bottom: 2.5rem; }
+        .vr-eyebrow { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.15em; color: var(--amber); margin-bottom: 0.5rem; font-weight: 600; }
+        .vr-title { font-family: 'Playfair Display', serif; font-size: 2.5rem; color: var(--ink); }
+
+        /* Tabs */
+        .vr-tabs { display: flex; gap: 0.75rem; margin-bottom: 2rem; }
+        .vr-tab {
+          padding: 0.6rem 1.5rem;
+          border-radius: 999px;
+          font-size: 0.875rem;
+          font-weight: 500;
+          cursor: pointer;
+          transition: all 0.2s;
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          border: 1px solid var(--border);
+          background: #fff;
+          color: var(--muted);
+        }
+        .vr-tab.active { background: var(--ink); color: #fff; border-color: var(--ink); }
+
+        /* Main Card */
+        .vr-card {
+          background: #fff;
+          border: 1px solid var(--border);
+          border-radius: var(--radius);
+          overflow: hidden;
+          box-shadow: 0 10px 40px rgba(0,0,0,0.03);
+          display: flex;
+        }
+
+        .vr-card-aside { width: 240px; background: var(--faint); border-right: 1px solid var(--border); padding: 1.5rem 1rem; }
+        .vr-card-main { flex: 1; padding: 3rem; }
+
+        .vr-method-btn {
+          width: 100%;
+          text-align: left;
+          padding: 0.8rem 1rem;
+          border-radius: 0.75rem;
+          margin-bottom: 0.5rem;
+          display: flex;
+          align-items: center;
+          gap: 0.75rem;
+          font-size: 0.9rem;
+          color: var(--muted);
+          transition: 0.2s;
+        }
+        .vr-method-btn.active { background: #fff; color: var(--ink); font-weight: 600; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+
+        .vr-input-group { margin-bottom: 1.5rem; }
+        .vr-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 0.5rem; display: block; font-weight: 600; }
+        
+        .vr-select, .vr-input {
+          width: 100%;
+          padding: 0.9rem 1.25rem;
+          border-radius: 0.875rem;
+          border: 1.5px solid var(--border);
+          background: var(--faint);
+          font-size: 0.95rem;
+          outline: none;
+          transition: 0.2s;
+        }
+        .vr-select:focus, .vr-input:focus { border-color: var(--amber); background: #fff; }
+
+        .vr-btn-primary {
+          background: var(--ink);
+          color: #fff;
+          width: 100%;
+          padding: 1rem;
+          border-radius: 999px;
+          font-weight: 500;
+          cursor: pointer;
+          border: 1.5px solid var(--ink);
+          transition: 0.2s;
+          margin-top: 1rem;
+        }
+        .vr-btn-primary:hover { background: transparent; color: var(--ink); }
+
+        /* Side Panel */
+        .vr-side-card {
+          background: #fff;
+          border: 1px solid var(--border);
+          border-radius: var(--radius);
+          padding: 1.75rem;
+          margin-bottom: 1.5rem;
+        }
+        .vr-side-title { font-size: 0.9rem; font-weight: 600; margin-bottom: 1rem; color: var(--ink); border-bottom: 1px solid var(--faint); padding-bottom: 0.75rem;}
+        .vr-balance-item { display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 0.6rem; color: var(--muted); }
+        .vr-balance-val { color: var(--ink); font-weight: 500; }
+        
+        .vr-progress-bg { height: 6px; background: var(--faint); border-radius: 10px; margin: 1rem 0; overflow: hidden; }
+        .vr-progress-fill { height: 100%; background: var(--amber); width: 15%; }
+      `}</style>
+
+      <div className="vr-shell">
+        <div className="vr-sidebar-wrap">
+          <Sidebar />
         </div>
 
-        {/* Payment Section */}
-        <div className="flex flex-1 mt-8 bg-white shadow-xl rounded-2xl overflow-hidden">
-          {/* Payment Methods Sidebar */}
-          {activeTab === "deposit" ? (
-            <div className="flex flex-col-2">
-              <div className="w-64  bg-blue-50">
-                <ul className="space-y-2 p-4">
-                  {methods.map((m) => (
-                    <li key={m.name}>
-                      <button
-                        onClick={() => setActive(m.name)}
-                        className={`flex items-center gap-3 w-full px-3 py-3 rounded-lg font-medium transition 
-                      ${
-                        active === m.name
-                          ? "bg-blue-100 text-blue-700 font-semibold"
-                          : "hover:bg-gray-100 text-gray-600"
-                      }`}
-                      >
-                        <m.icon className="w-5 h-5" />
-                        {m.name}
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              </div>
+        <main className="vr-container">
+          {/* Left Column */}
+          <section>
+            <header className="vr-page-header">
+              <p className="vr-eyebrow">Financial Services</p>
+              <h1 className="vr-title">Transfer Funds</h1>
+            </header>
 
-              {/* Payment Form */}
-              <div className="space-y-4 max-w-md">
-                {/* Bank Selection */}
-                <select
-                  className="w-full border rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-blue-400"
-                  onChange={(e) =>
-                    console.log("Selected Bank:", e.target.value)
-                  }
-                >
-                  <option value="">Select your bank</option>
-                  <option value="hdfc">HDFC</option>
-                  <option value="sbi">SBI</option>
-                  <option value="icici">ICICI</option>
-                  <option value="axis">Axis</option>
-                </select>
+            <div className="vr-tabs">
+              <button 
+                onClick={() => setActiveTab("deposit")}
+                className={`vr-tab ${activeTab === "deposit" ? "active" : ""}`}
+              >
+                <ArrowDownToLine size={16} /> Deposit
+              </button>
+              <button 
+                onClick={() => setActiveTab("withdraw")}
+                className={`vr-tab ${activeTab === "withdraw" ? "active" : ""}`}
+              >
+                <ArrowUpFromLine size={16} /> Withdraw
+              </button>
+            </div>
 
-                {/* Amount + CTA */}
-                <div className="flex items-center justify-between mt-6">
-                  <input
-                    type="number"
-                    placeholder="Rs 2000"
-                    className="flex-1 border rounded-xl p-3 mr-4 focus:outline-none focus:ring-2 focus:ring-blue-400"
-                    onChange={(e) => {
-                      setAmt(Number(e.target.value));
-                    }}
-                  />
+            <div className="vr-card">
+              <aside className="vr-card-aside">
+                <p className="vr-label" style={{ paddingLeft: '1rem', marginBottom: '1rem' }}>Method</p>
+                {methods.map((m) => (
                   <button
-                    className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-6 py-3 rounded-xl font-bold shadow-md hover:scale-105 transition"
-                    onClick={handlePay}
+                    key={m.name}
+                    onClick={() => setMethod(m.name)}
+                    className={`vr-method-btn ${method === m.name ? "active" : ""}`}
                   >
-                    PAY NOW
+                    <m.icon size={18} /> {m.name}
                   </button>
-                </div>
+                ))}
+              </aside>
+
+              <div className="vr-card-main">
+                {activeTab === "deposit" ? (
+                  <div style={{ maxWidth: '400px' }}>
+                    <div className="vr-input-group">
+                      <label className="vr-label">Select Institution</label>
+                      <select className="vr-select">
+                        <option>HDFC Bank</option>
+                        <option>State Bank of India</option>
+                        <option>ICICI Bank</option>
+                        <option>Axis Bank</option>
+                      </select>
+                    </div>
+
+                    <div className="vr-input-group">
+                      <label className="vr-label">Amount (INR)</label>
+                      <input 
+                        type="number" 
+                        placeholder="0.00" 
+                        className="vr-input" 
+                        onChange={(e) => setAmt(Number(e.target.value))}
+                      />
+                    </div>
+
+                    <button 
+                      className="vr-btn-primary" 
+                      onClick={handlePay}
+                      disabled={loading}
+                    >
+                      {loading ? "Processing..." : "Initiate Deposit"}
+                    </button>
+
+                    <div style={{ marginTop: '1.5rem', display: 'flex', gap: '0.5rem', alignItems: 'center', fontSize: '0.75rem', color: '#999' }}>
+                      <Lock size={12} /> Secure encrypted transaction
+                    </div>
+                  </div>
+                ) : (
+                  <div style={{ textAlign: 'center', color: 'var(--muted)', paddingTop: '2rem' }}>
+                    Withdrawal interface is currently being optimized.
+                  </div>
+                )}
               </div>
             </div>
-          ) : (
-            ""
-          )}
-        </div>
+          </section>
+
+          {/* Right Column */}
+          <aside>
+            <div className="vr-side-card" style={{ marginTop: '6.5rem' }}>
+              <h2 className="vr-side-title">Portfolio Balance</h2>
+              <div className="vr-balance-item">
+                <span>Total balance</span>
+                <span className="vr-balance-val">0.00 BTC</span>
+              </div>
+              <div className="vr-balance-item">
+                <span>Staking</span>
+                <span className="vr-balance-val">0.00 BTC</span>
+              </div>
+              <div className="vr-balance-item">
+                <span>Available</span>
+                <span className="vr-balance-val">0.00 BTC</span>
+              </div>
+            </div>
+
+            <div className="vr-side-card">
+              <h2 className="vr-side-title">Funding Limits</h2>
+              <p style={{ fontSize: '0.8rem', color: 'var(--muted)' }}>
+                Daily limit: <span style={{ color: 'var(--ink)' }}>Unlimited</span>
+              </p>
+              <div className="vr-progress-bg">
+                <div className="vr-progress-fill"></div>
+              </div>
+              <p style={{ fontSize: '0.7rem', color: '#999' }}>You have used 15% of your verification tier limit.</p>
+            </div>
+
+            <button 
+              className="vr-btn-primary" 
+              style={{ background: 'transparent', color: 'var(--ink)' }}
+              onClick={() => router.push("/transactions")}
+            >
+              View Transaction History
+            </button>
+          </aside>
+        </main>
       </div>
-
-      {/* Right Panel */}
-      <div className="w-1/3 bg-gray-50 py-40 space-y-6">
-        {/* INR Balance */}
-        <div className="bg-white shadow-sm rounded-xl p-5">
-          <h2 className="font-semibold text-lg mb-2">INR Balance</h2>
-          <ul className="space-y-1 text-gray-700 text-sm">
-            <li>Total balance: 0 BTC</li>
-            <li>Order balance: 0 BTC</li>
-            <li>Staking balance: 0 BTC</li>
-            <li>Available balance: 0 BTC</li>
-          </ul>
-        </div>
-
-        {/* Funding limits */}
-        <div className="bg-white shadow-sm rounded-xl p-5">
-          <h2 className="font-semibold text-lg mb-2">Funding limits</h2>
-          <p className="text-sm text-gray-500">
-            Daily deposits: $0.00 of Unlimited USD
-          </p>
-          <div className="w-full bg-gray-200 h-2 rounded-full mt-2">
-            <div className="bg-blue-500 h-2 w-1/6 rounded-full"></div>
-          </div>
-        </div>
-
-        {/* Recent Transactions */}
-        <div className="bg-white shadow-sm rounded-xl p-5">
-          <h2 className="font-semibold text-lg mb-2">Recent transactions</h2>
-          <div></div>
-          <button
-            className="bg-purple-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-purple-600 transition"
-            onClick={() => router.push("/transactions")}
-          >
-            View all transactions
-          </button>
-        </div>
-      </div>
-    </div>
+    </>
   );
 }
