@@ -679,7 +679,7 @@ export default function Page() {
             <p className="vrinmo-cta-label">Start today</p>
             <h2 className="vrinmo-cta-title">Your money, your terms.</h2>
             <p className="vrinmo-cta-sub">Join half a million Indians who've made Vrinmo their everyday payments app.</p>
-            <button className="vrinmo-cta-btn">Create free account</button>
+            <button className="vrinmo-cta-btn" onClick={()=>{window.location.href = "/signin"}}>Create free account</button>
           </div>
         </div>
 
