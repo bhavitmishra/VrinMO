@@ -16,7 +16,7 @@ jobs:
           node-version: "20"
 
       - name: Install Dependencies
-        run: npm install
+        run: npm ci
       - name: Generating Prisma CLient
         run: npm run db:generate
 
