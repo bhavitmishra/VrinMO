@@ -642,28 +642,6 @@ export default function Page() {
         <div className="vrinmo-divider" />
 
         {/* ══════════════════════════════ HOW IT WORKS ══════════════════════ */}
-        <section className="vrinmo-steps-bg" id="how">
-          <div className="vrinmo-section">
-            <div
-              ref={stepsSec.ref}
-              style={{
-                opacity: stepsSec.visible ? 1 : 0,
-                transform: stepsSec.visible ? "translateY(0)" : "translateY(18px)",
-                transition: "opacity 0.6s, transform 0.6s",
-                textAlign: "center",
-                marginBottom: "3.5rem",
-              }}
-            >
-              <p className="vrinmo-section-label">The process</p>
-              <h2 className="vrinmo-section-title" style={{ marginBottom: 0 }}>Up and running in three steps</h2>
-            </div>
-            <div className="vrinmo-steps-grid">
-              <Step num="I"   title="Create an Account"    desc="Sign up in under a minute with your email or phone number." delay={0} />
-              <Step num="II"  title="Link Your Money"       desc="Connect your bank account or card — fully encrypted, fully safe." delay={130} />
-              <Step num="III" title="Send & Receive"        desc="Tap a name, confirm, done. Money moves before you put your phone down." delay={260} />
-            </div>
-          </div>
-        </section>
 
         {/* ══════════════════════════════ CTA ══════════════════════════════ */}
         <div
@@ -677,26 +655,13 @@ export default function Page() {
         >
           <div className="vrinmo-cta-inner">
             <p className="vrinmo-cta-label">Start today</p>
-            <h2 className="vrinmo-cta-title">Your money, your terms.</h2>
-            <p className="vrinmo-cta-sub">Join half a million Indians who've made Vrinmo their everyday payments app.</p>
+            <h2 className="vrinmo-cta-title">Your psuedo money, your terms.</h2>
+            <p className="vrinmo-cta-sub">A Developer who tried simulating UPI.</p>
             <button className="vrinmo-cta-btn" onClick={()=>{window.location.href = "/signin"}}>Create free account</button>
           </div>
         </div>
 
         {/* ══════════════════════════════ FOOTER ═══════════════════════════ */}
-        <footer>
-          <div className="vrinmo-footer">
-            <a href="/" className="vrinmo-footer-logo">
-              Vrinmo <span className="vrinmo-footer-logo-dot" />
-            </a>
-            <p className="vrinmo-footer-copy">© {new Date().getFullYear()} Vrinmo. All rights reserved.</p>
-            <nav className="vrinmo-footer-links">
-              <a href="#">Privacy</a>
-              <a href="#">Terms</a>
-              <a href="#">Support</a>
-            </nav>
-          </div>
-        </footer>
 
       </div>
     </>
