@@ -9,6 +9,7 @@ function useInView(threshold = 0.15) {
     const el = ref.current;
     if (!el) return;
     const obs = new IntersectionObserver(
+      // @ts-ignore
       ([e]) => { if (e.isIntersecting) { setVisible(true); obs.disconnect(); } },
       { threshold }
     );
@@ -558,7 +559,7 @@ export default function Page() {
               >
                 <div className="vrinmo-badge">
                   <span className="vrinmo-badge-dot" />
-                  Developed by Bhavit Mishra
+                  A focused payment demo
                 </div>
               </div>
 
@@ -573,25 +574,25 @@ export default function Page() {
                 className={`vrinmo-hero-sub hero-enter${mounted ? " in" : ""}`}
                 style={{ transitionDuration: "0.6s", transitionDelay: "0.28s" }}
               >
-                Send money to anyone and pay for anything — online, in-store,
-                or splitting a bill — all from one clean, fast app.
+                A simple wallet for trying the full payment loop: add funds,
+                send a transfer, and see the balance update in real time.
               </p>
 
               <div
                 className={`vrinmo-hero-actions hero-enter${mounted ? " in" : ""}`}
                 style={{ transitionDuration: "0.6s", transitionDelay: "0.4s" }}
               >
-                <a href="/signin" className="vrinmo-btn-primary">Get started free</a>
-                <a href="#how" className="vrinmo-btn-ghost">See how it works →</a>
+                <a href="/signin" className="vrinmo-btn-primary">Open the demo <span aria-hidden="true">↗</span></a>
+                <a href="#how" className="vrinmo-btn-ghost">See the flow <span aria-hidden="true">↓</span></a>
               </div>
 
               <div
                 className={`vrinmo-hero-stats hero-enter${mounted ? " in" : ""}`}
                 style={{ transitionDuration: "0.6s", transitionDelay: "0.54s" }}
               >
-                <Stat value="₹2B+" label="Transferred" />
-                <Stat value="4.9 ★" label="App rating" />
-                <Stat value="500K+" label="Users" />
+                <Stat value="UPI" label="Payment rail" />
+                <Stat value="Live" label="Balance updates" />
+                <Stat value="1 app" label="For every step" />
               </div>
             </div>
 
@@ -606,7 +607,7 @@ export default function Page() {
                 </video>
                 <div className="vrinmo-video-badge">
                   <span className="vrinmo-video-badge-dot" />
-                  Live transfers enabled
+                  Ready for a test transfer
                 </div>
               </div>
             </div>
@@ -629,12 +630,12 @@ export default function Page() {
               }}
             >
               <p className="vrinmo-section-label">Why Vrinmo</p>
-              <h2 className="vrinmo-section-title">Built around <em>your</em> life</h2>
+              <h2 className="vrinmo-section-title">Everything you need to <em>move money</em></h2>
             </div>
             <div className="vrinmo-features-grid">
-              <FeatureCard icon="⚡" title="Instant Transfers" desc="Money reaches your recipient in seconds. Real-time confirmations so you're never left wondering." delay={0} />
-              <FeatureCard icon="🛡️" title="Bank-Grade Security" desc="End-to-end encryption, biometric lock, and round-the-clock fraud detection on every transaction." delay={110} />
-              <FeatureCard icon="🌐" title="Pay Anywhere" desc="UPI, online checkout, or splitting dinner — one app handles every payment without the friction." delay={220} />
+              <FeatureCard icon="01" title="Add money" desc="Start with an on-ramp transaction and give your wallet a balance to work with." delay={0} />
+              <FeatureCard icon="02" title="Send directly" desc="Choose a recipient, enter an amount, and complete a peer-to-peer transfer." delay={110} />
+              <FeatureCard icon="03" title="Stay in control" desc="Review your balance and transaction history after every movement of money." delay={220} />
             </div>
           </div>
         </section>
@@ -642,6 +643,29 @@ export default function Page() {
         <div className="vrinmo-divider" />
 
         {/* ══════════════════════════════ HOW IT WORKS ══════════════════════ */}
+        <section id="how" className="vrinmo-steps-bg">
+          <div className="vrinmo-section">
+            <div
+              ref={stepsSec.ref}
+              style={{
+                opacity: stepsSec.visible ? 1 : 0,
+                transform: stepsSec.visible ? "translateY(0)" : "translateY(18px)",
+                transition: "opacity 0.6s, transform 0.6s",
+                marginBottom: "3.5rem",
+              }}
+            >
+              <p className="vrinmo-section-label">The flow</p>
+              <h2 className="vrinmo-section-title">From first click to <em>receipt</em></h2>
+            </div>
+            <div className="vrinmo-steps-grid">
+              <Step num="01" title="Create your account" desc="Sign in with your phone number and open your wallet." delay={0} />
+              <Step num="02" title="Fund your wallet" desc="Add a test balance through the on-ramp flow." delay={110} />
+              <Step num="03" title="Make a transfer" desc="Send money and confirm the result in your activity." delay={220} />
+            </div>
+          </div>
+        </section>
+
+        <div className="vrinmo-divider" />
 
         {/* ══════════════════════════════ CTA ══════════════════════════════ */}
         <div
@@ -655,9 +679,9 @@ export default function Page() {
         >
           <div className="vrinmo-cta-inner">
             <p className="vrinmo-cta-label">Start today</p>
-            <h2 className="vrinmo-cta-title">Your psuedo money, your terms.</h2>
-            <p className="vrinmo-cta-sub">A Developer who tried simulating UPI.</p>
-            <button className="vrinmo-cta-btn" onClick={()=>{window.location.href = "/signin"}}>Create free account</button>
+            <h2 className="vrinmo-cta-title">Try the complete payment flow.</h2>
+            <p className="vrinmo-cta-sub">A practical simulation of a UPI-style wallet, built to be explored.</p>
+            <button className="vrinmo-cta-btn" onClick={() => { window.location.href = "/signin" }}>Open VrinMO <span aria-hidden="true">↗</span></button>
           </div>
         </div>
 
